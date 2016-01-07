@@ -259,55 +259,55 @@ Kernel.autorun = function(f, options) {
   });
 };
 
-Blaze.View.prototype.autorun = function(f, _inViewScope) {
-  var self = this;
-
-  // Lets just have the Blaze autorun defered via the Kernel
-
-  // The restrictions on when View#autorun can be called are in order
-  // to avoid bad patterns, like creating a Blaze.View and immediately
-  // calling autorun on it.  A freshly created View is not ready to
-  // have logic run on it; it doesn't have a parentView, for example.
-  // It's when the View is materialized or expanded that the onViewCreated
-  // handlers are fired and the View starts up.
-  //
-  // Letting the render() method call `this.autorun()` is problematic
-  // because of re-render.  The best we can do is to stop the old
-  // autorun and start a new one for each render, but that's a pattern
-  // we try to avoid internally because it leads to helpers being
-  // called extra times, in the case where the autorun causes the
-  // view to re-render (and thus the autorun to be torn down and a
-  // new one established).
-  //
-  // We could lift these restrictions in various ways.  One interesting
-  // idea is to allow you to call `view.autorun` after instantiating
-  // `view`, and automatically wrap it in `view.onViewCreated`, deferring
-  // the autorun so that it starts at an appropriate time.  However,
-  // then we can't return the Computation object to the caller, because
-  // it doesn't exist yet.
-  if (! self.isCreated) {
-    throw new Error("View#autorun must be called from the created callback at the earliest");
-  }
-  if (this._isInRender) {
-    throw new Error("Can't call View#autorun from inside render(); try calling it from the created or rendered callback");
-  }
-  if (Tracker.active) {
-    throw new Error("Can't call View#autorun from a Tracker Computation; try calling it from the created or rendered callback");
-  }
-
-  var c = Kernel.autorun(function viewAutorun(c) {
-
-    Blaze._withCurrentView(_inViewScope || self, function () {
-      return f.call(self, c);
-    });
-
-  });
-
-  self.onViewDestroyed(function () { c.stop(); });
-
-  return c;
-
-};
+// Blaze.View.prototype.autorun = function(f, _inViewScope) {
+//   var self = this;
+// 
+//   // Lets just have the Blaze autorun defered via the Kernel
+// 
+//   // The restrictions on when View#autorun can be called are in order
+//   // to avoid bad patterns, like creating a Blaze.View and immediately
+//   // calling autorun on it.  A freshly created View is not ready to
+//   // have logic run on it; it doesn't have a parentView, for example.
+//   // It's when the View is materialized or expanded that the onViewCreated
+//   // handlers are fired and the View starts up.
+//   //
+//   // Letting the render() method call `this.autorun()` is problematic
+//   // because of re-render.  The best we can do is to stop the old
+//   // autorun and start a new one for each render, but that's a pattern
+//   // we try to avoid internally because it leads to helpers being
+//   // called extra times, in the case where the autorun causes the
+//   // view to re-render (and thus the autorun to be torn down and a
+//   // new one established).
+//   //
+//   // We could lift these restrictions in various ways.  One interesting
+//   // idea is to allow you to call `view.autorun` after instantiating
+//   // `view`, and automatically wrap it in `view.onViewCreated`, deferring
+//   // the autorun so that it starts at an appropriate time.  However,
+//   // then we can't return the Computation object to the caller, because
+//   // it doesn't exist yet.
+//   if (! self.isCreated) {
+//     throw new Error("View#autorun must be called from the created callback at the earliest");
+//   }
+//   if (this._isInRender) {
+//     throw new Error("Can't call View#autorun from inside render(); try calling it from the created or rendered callback");
+//   }
+//   if (Tracker.active) {
+//     throw new Error("Can't call View#autorun from a Tracker Computation; try calling it from the created or rendered callback");
+//   }
+// 
+//   var c = Kernel.autorun(function viewAutorun(c) {
+// 
+//     Blaze._withCurrentView(_inViewScope || self, function () {
+//       return f.call(self, c);
+//     });
+// 
+//   });
+// 
+//   self.onViewDestroyed(function () { c.stop(); });
+// 
+//   return c;
+// 
+// };
 
 
 /**
